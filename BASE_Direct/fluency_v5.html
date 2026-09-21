@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>Verbal judgement</title>
+<script src="https://unpkg.com/jspsych@8.2.3"></script>
+<script src="https://unpkg.com/@jspsych/plugin-preload@2.1.0"></script>
+<script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@2.1.0"></script>
+<script src="https://unpkg.com/@jspsych/plugin-html-button-response@2.1.0"></script>
+<script src="https://unpkg.com/@jspsych/plugin-survey-html-form@2.1.0"></script>
+<script src="https://unpkg.com/@jspsych/plugin-survey@2.1.0"></script>
+<link href="https://unpkg.com/jspsych@8.2.3/css/jspsych.css" rel="stylesheet"/>
+<link href="https://unpkg.com/@jspsych/plugin-survey@2.1.0/css/survey.css" rel="stylesheet"/>
+<script src="https://unpkg.com/@jspsych/plugin-survey-text@2.1.0"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+<script src="https://unpkg.com/typo-js@1.2.4/typo.js"></script>
+</head>
+<body>
+<div id="loading-msg" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:1.4em;color:#555;">Please wait...</div>
+</body>
+<script src="timeline_Dis_2m_8t_v5.js"></script>
+<script>
+  let dictionary;
+
+  async function loadDictionary() {
+    const aff = await fetch("dictionaries/en_US.aff").then(r => r.text());
+    const dic = await fetch("dictionaries/en_US.dic").then(r => r.text());
+    dictionary = new Typo("en_US", aff, dic);
+  }
+
+  function saveData(name, data) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', 'SavePHP.php');
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.send(JSON.stringify({ filedata: data, filename: name }));
+  }
+
+  async function startExperiment() {
+    await loadDictionary();
+    document.getElementById('loading-msg').style.display = 'none';
+
+    const jsPsych = initJsPsych({
+      show_progress_bar: true
+    });
+    jsPsych.data.addProperties({ group: "BASE", version: "Direct", rotation: 5 });
+
+    const timeline = await buildTimeline(jsPsych, dictionary);
+    jsPsych.run(timeline);
+  }
+
+  startExperiment();
+</script>
